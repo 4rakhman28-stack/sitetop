@@ -1,7 +1,4 @@
-/**
- * Один раз поставь адрес своего основного сайта.
- * Дальше статьи в файл добавлять не нужно.
- */
 window.CONFIG = {
-  site: "https://diamondscripts.com",
+  site: "https://pastebin.com",
+  countdown: 5,
 };

@@ -21,23 +21,15 @@ body {
   border: 1px solid #333;
   border-radius: 12px;
   padding: 24px;
-}
-
-h1 {
-  margin: 0 0 8px;
-  font-size: 1.4rem;
+  text-align: center;
 }
 
 .muted {
   color: #aaa;
-  margin: 0 0 20px;
+  margin: 16px 0 0;
   line-height: 1.4;
-}
-
-.label {
-  display: block;
-  margin-bottom: 8px;
-  color: #ccc;
+  word-break: break-all;
+  font-size: 12px;
 }
 
 .input {
@@ -51,21 +43,30 @@ h1 {
   font: inherit;
 }
 
-.btn {
-  display: inline-block;
-  background: #3b82f6;
-  color: #fff;
+.btn-gold {
+  display: block;
+  width: 100%;
+  background: linear-gradient(180deg, #ffe58a 0%, #f0c14b 38%, #c99412 70%, #8a6a08 100%);
+  color: #2a1c00;
   text-decoration: none;
-  border: 0;
-  padding: 12px 18px;
-  border-radius: 8px;
+  border: 1px solid #f6e27a;
+  padding: 16px 18px;
+  border-radius: 10px;
   font: inherit;
-  font-weight: 700;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
   cursor: pointer;
+  box-shadow: 0 8px 24px rgba(201, 148, 18, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.45);
 }
 
-.btn:hover {
-  background: #2563eb;
+.btn-gold:hover:not(.is-wait) {
+  filter: brightness(1.06);
+}
+
+.btn-gold.is-wait {
+  cursor: not-allowed;
+  filter: saturate(0.85);
 }
 
 .ad {
@@ -77,10 +78,4 @@ h1 {
   place-items: center;
   color: #888;
   background: #181818;
-}
-
-code {
-  background: #2a2a2a;
-  padding: 2px 6px;
-  border-radius: 4px;
 }
