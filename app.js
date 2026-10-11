@@ -2,7 +2,6 @@
   const app = document.getElementById("app");
   const params = new URLSearchParams(window.location.search);
   const rawTo = (params.get("to") || "").trim();
-  const customTitle = (params.get("t") || "").trim();
 
   if (!rawTo) {
     renderMaker();
@@ -14,28 +13,49 @@
     app.innerHTML = `
       <h1>Ссылка не подошла</h1>
       <p class="muted">${escapeHtml(destination.error)}</p>
-      <p class="muted">В <code>config.js</code> должен стоять адрес твоего сайта.</p>
     `;
     return;
   }
 
-  const title = customTitle || titleFromUrl(destination.url);
+  const scriptId = scriptIdFromUrl(destination.url);
+  boot(destination.url, scriptId);
 
-  app.innerHTML = `
-    <h1>${escapeHtml(title)}</h1>
-    <p class="muted">Статья на ${escapeHtml(destination.url.hostname)}</p>
-    <a class="btn" href="${escapeAttr(destination.url.href)}">Читать статью</a>
-  `;
+  async function boot(url, id) {
+    app.innerHTML = `<p class="muted">Загрузка…</p>`;
+
+    let title = titleFromUrl(url);
+    let image = "";
+
+    if (id) {
+      const row = await fetchScript(id);
+      if (row) {
+        if (row.title) title = row.title;
+        if (row.game_img) image = row.game_img;
+      }
+    }
+
+    document.title = title;
+
+    const imgHtml = image
+      ? `<img class="cover" src="${escapeAttr(image)}" alt="${escapeAttr(title)}" referrerpolicy="no-referrer" />`
+      : "";
+
+    app.innerHTML = `
+      ${imgHtml}
+      <h1>${escapeHtml(title)}</h1>
+      <a class="btn" href="${escapeAttr(url.href)}">Читать статью</a>
+    `;
+  }
 
   function renderMaker() {
     app.innerHTML = `
       <h1>Собрать ссылку на прокладку</h1>
       <p class="muted">
-        Вставь адрес статьи с основного сайта. Список руками вести не надо —
-        статья уже сидит в самой ссылке.
+        Вставь адрес скрипта, например
+        <code>https://diamondscripts.com/script/5</code>
       </p>
       <label class="label" for="article-url">URL статьи</label>
-      <input id="article-url" class="input" type="url" placeholder="https://diamondscripts.com/statya" />
+      <input id="article-url" class="input" type="url" placeholder="https://diamondscripts.com/script/5" />
       <button class="btn" type="button" id="make-btn">Скопировать ссылку</button>
       <p class="muted" id="make-status"></p>
     `;
@@ -61,6 +81,38 @@
         status.textContent = text;
       }
     });
+  }
+
+  async function fetchScript(id) {
+    const url = window.CONFIG && window.CONFIG.supabaseUrl;
+    const key = window.CONFIG && window.CONFIG.supabaseAnonKey;
+    if (!url || !key) return null;
+
+    try {
+      const endpoint =
+        url.replace(/\/$/, "") +
+        "/rest/v1/scripts?select=title,game_img&id=eq." +
+        encodeURIComponent(id);
+
+      const res = await fetch(endpoint, {
+        headers: {
+          apikey: key,
+          Authorization: "Bearer " + key,
+          Accept: "application/json",
+        },
+        signal: AbortSignal.timeout(8000),
+      });
+      if (!res.ok) return null;
+      const rows = await res.json();
+      return rows && rows[0] ? rows[0] : null;
+    } catch {
+      return null;
+    }
+  }
+
+  function scriptIdFromUrl(url) {
+    const match = url.pathname.match(/\/script\/([^/]+)\/?$/i);
+    return match ? decodeURIComponent(match[1]) : "";
   }
 
   function resolveDestination(value) {

@@ -23,8 +23,18 @@ body {
   padding: 24px;
 }
 
+.cover {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  background: #111;
+  display: block;
+}
+
 h1 {
-  margin: 0 0 8px;
+  margin: 0 0 16px;
   font-size: 1.4rem;
 }
 
