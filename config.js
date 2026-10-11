@@ -1,4 +1,4 @@
 window.CONFIG = {
-  site: "https://pastebin.com",
+  allowedHosts: ["diamondscripts.com", "pastebin.com"],
   countdown: 5,
 };

@@ -45,7 +45,7 @@
 
   function renderMaker() {
     app.innerHTML = `
-      <input id="article-url" class="input" type="url" placeholder="https://pastebin.com/xxxxx" />
+      <input id="article-url" class="input" type="url" placeholder="https://pastebin.com/xxxxx или https://diamondscripts.com/script/3" />
       <button class="btn-gold" type="button" id="make-btn">Copy link</button>
       <p class="muted" id="make-status"></p>
     `;
@@ -78,16 +78,16 @@
       return { ok: false, error: "Empty URL." };
     }
 
-    const base = getSiteOrigin();
-    if (!base) {
-      return { ok: false, error: "Set pastebin.com in config.js." };
+    const allowed = getAllowedHosts();
+    if (!allowed.length) {
+      return { ok: false, error: "No allowed hosts." };
     }
 
     let parsed;
     try {
       parsed = value.startsWith("http://") || value.startsWith("https://")
         ? new URL(value)
-        : new URL(value.startsWith("/") ? value : "/" + value, base.origin);
+        : new URL(value.startsWith("/") ? value : "/" + value, "https://" + allowed[0]);
     } catch {
       return { ok: false, error: "Bad URL." };
     }
@@ -96,24 +96,27 @@
       return { ok: false, error: "Need http/https." };
     }
 
-    if (!hostsMatch(parsed.hostname, base.hostname)) {
-      return { ok: false, error: "Only " + base.hostname };
+    if (!isAllowedHost(parsed.hostname, allowed)) {
+      return { ok: false, error: "Only diamondscripts.com or pastebin.com" };
     }
 
     return { ok: true, url: parsed };
   }
 
-  function getSiteOrigin() {
-    try {
-      const site = (window.CONFIG && window.CONFIG.site) || "";
-      return new URL(site);
-    } catch {
-      return null;
-    }
+  function getAllowedHosts() {
+    const list = (window.CONFIG && window.CONFIG.allowedHosts) || [];
+    return list.map(normHost).filter(Boolean);
   }
 
-  function hostsMatch(a, b) {
-    const norm = (h) => h.replace(/^www\./, "").toLowerCase();
-    return norm(a) === norm(b);
+  function isAllowedHost(hostname, allowed) {
+    return allowed.includes(normHost(hostname));
+  }
+
+  function normHost(host) {
+    return String(host || "")
+      .replace(/^https?:\/\//i, "")
+      .replace(/\/.*$/, "")
+      .replace(/^www\./, "")
+      .toLowerCase();
   }
 })();
